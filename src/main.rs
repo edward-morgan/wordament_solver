@@ -1,4 +1,9 @@
-use wordament_solver::*;
+mod grid;
+mod dictionary;
+mod lib;
+
+use grid::*;
+use lib::Solution;
 
 fn main() {
   let mut grid = Grid::init(2, 2);
@@ -8,4 +13,10 @@ fn main() {
   grid.set_cell('d', 1, 1, 1);
 
   println!("{:?}", grid);
+
+  println!("{}", find_all_words(&grid, &dictionary::DebugDictionary::new()));
+}
+
+fn find_all_words(grid: &Grid, dict: &dictionary::DebugDictionary) -> Solution {
+  Solution::new(vec![String::from("")], 0)
 }
