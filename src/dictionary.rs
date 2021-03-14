@@ -2,6 +2,19 @@
 
 // TODO: add merriam-webster API dictionary: https://dictionaryapi.com/products/index
 
+/** Thoughts on how to build the dictionary data structure
+ * 'a' -> | 'aa' -> ... ... ... 'aardvark' ...
+ *        | 'ab' -> ...
+ *        |...
+ * ;
+ * 'b' -> | 'ba' -> ... ... ... 'barter' -> ... ... ... 'bartered' (terminal word)
+ *        | bb -> Empty (no words start with 'bb')
+ *        |...
+ * ...
+ */
+
+
+
 // Simple dictionary for debugging use
 pub struct DebugDictionary {
   words: Vec<String>,

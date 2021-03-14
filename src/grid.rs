@@ -25,11 +25,14 @@ impl Grid {
 impl fmt::Debug for Grid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
       for row in &self.cells {
-        write!(f, "| ");
+        let res: fmt::Result = write!(f, "| ");
+        if res.is_err() { return res }
         for cell in row {
-          write!(f, "{:?} | ", cell);
+          let res: fmt::Result = write!(f, "{:?} | ", cell);
+          if res.is_err() { return res }
         }
-        write!(f, "\n");
+        let res: fmt::Result = write!(f, "\n");
+        if res.is_err() { return res }
       }
       write!(f, "")
     }

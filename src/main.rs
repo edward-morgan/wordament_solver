@@ -5,6 +5,14 @@ mod lib;
 use grid::*;
 use lib::Solution;
 
+/** Assumptions:
+ * - Words must be made by connecting letters adjacent to each other, along a path.
+ * - Letters cannot be reused.
+ * 
+ *        start
+ * | (a) | (b) | --> b, a, d
+ * |  c  | (d) |
+ */
 fn main() {
   let mut grid = Grid::init(2, 2);
   grid.set_cell('a', 1, 0, 0);
