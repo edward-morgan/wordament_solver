@@ -1,17 +1,5 @@
 use std::fmt;
 
-use crate::grid::*;
-use crate::dictionary::*;
-
-pub fn find_words(grid: &Grid, dict: &DebugDictionary) -> Solution {
-  // Start at (0, 0), move through each cell in the dictionary
-
-  // Find all words starting with that letter
-
-  // Append results to solution
-}
-
-
 // Represents a solution for a Grid with a dictionary
 // TODO: we may want to implement Copy (and thus not use Vec)
 pub struct Solution {
@@ -19,6 +7,8 @@ pub struct Solution {
   score: u32
 }
 impl Solution {
+  /** Form a solutuion with a list of words found, as well as a total score for the solution.
+   */
   pub fn new(words_found: Vec<String>, score: u32) -> Solution {
     Solution { words_found, score }
   }

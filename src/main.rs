@@ -20,9 +20,13 @@ fn main() {
   grid.set_cell('c', 1, 1, 0);
   grid.set_cell('d', 1, 1, 1);
 
-  println!("{:?}", grid);
+  println!("Grid:\n{:?}", grid);
 
-  println!("{}", find_all_words(&grid, &dictionary::DebugDictionary::new()));
+  // Set up the dictionary
+  let dbd = dictionary::DebugDictionary::new();
+
+  println!("Dictionary: \n{}", dbd.to_string());
+  // println!("{}", find_all_words(&grid, &dictionary::DebugDictionary::new()));
 }
 
 fn find_all_words(grid: &Grid, dict: &dictionary::DebugDictionary) -> Solution {
