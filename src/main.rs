@@ -16,10 +16,10 @@ use wordament_solver::Solution;
  */
 fn main() {
   let mut grid = grid::Grid::init(2, 2);
-  grid.set_cell('a', 1, 0, 0);
-  grid.set_cell('b', 1, 0, 1);
-  grid.set_cell('c', 1, 1, 0);
-  grid.set_cell('d', 1, 1, 1);
+  grid.set('a', 1, 0, 0);
+  grid.set('b', 1, 0, 1);
+  grid.set('c', 1, 1, 0);
+  grid.set('d', 1, 1, 1);
 
   println!("Grid:\n{:?}", grid);
 
@@ -34,10 +34,6 @@ fn main() {
       println!("{}: {}", word, DebugDictionary::find_word(dbd, word));
     }
     println!("{}", DebugDictionary::to_string(dbd));
-
-    let s1 = Solution::new(vec![String::from("one"), String::from("two")], 8);
-    let s2 = Solution::new(vec![String::from("three"), String::from("four")], 10);
-    println!("{}", s1 + s2);
 
   // println!("{}", find_all_words(&grid, &dictionary::DebugDictionary::new()));
 }

@@ -1,6 +1,5 @@
-// TODO: define a trait for multiple dictionary types: debug, API access, local file, etc.
 
-/** Thoughts on how to build the dictionary data structure
+/* Thoughts on how to build the dictionary data structure
  * 'a' -> | 'aa' -> ... ... ... 'aardvark' ...
  *        | 'ab' -> ...
  *        |...
@@ -50,7 +49,7 @@ impl Dictionary for DebugDictionary {
   fn find_word(dict: &Self, letters: &str) -> bool {
     let mut current_letter: &Letter = &Letter::default();
     for (i, letter) in letters.chars().enumerate() {
-      let index = letter as usize - DebugDictionary::ASCII_A_VALUE;
+      let index = letter as usize - DebugDictionary::ASCII_a_VALUE;
       // TODO: Could get rid of this "is i == 0" nonsense by making the dictionary start with an (always Present) Entry.
       if i == 0 {
         match &dict.words[index] {
@@ -70,7 +69,7 @@ impl Dictionary for DebugDictionary {
 }
 
 impl DebugDictionary {
-  const ASCII_A_VALUE: usize = 97;
+  const ASCII_a_VALUE: usize = 'a' as usize;
   // const ASCII_Z_VALUE: usize = 122;
 
   pub fn new() -> DebugDictionary {
@@ -93,7 +92,7 @@ impl DebugDictionary {
           Entry::Empty => {
             // let str_addition = format!(
             //   "{}: <Empty>\n",
-            //   (i as u8 + DebugDictionary::ASCII_A_VALUE as u8) as char
+            //   (i as u8 + DebugDictionary::ASCII_a_VALUE as u8) as char
             // );
             // let spaces_str = " ".repeat(spaces);
             // string.push_str(format!("{}{}", str_addition, spaces_str).as_str());
@@ -106,7 +105,7 @@ impl DebugDictionary {
             };
             let str_addition = format!(
               "{}: {} -> ",
-              (i as u8 + DebugDictionary::ASCII_A_VALUE as u8) as char,
+              (i as u8 + DebugDictionary::ASCII_a_VALUE as u8) as char,
               is_word_string
             );
             let spaces_str = "- ".repeat(spaces);
@@ -135,9 +134,9 @@ impl DebugDictionary {
         let cur_is_word: bool = if i == word.len() - 1 { true } else { false };
         // If the first letter in the word
         if i == 0 {
-          match &mut dict[(character as usize) - DebugDictionary::ASCII_A_VALUE] {
+          match &mut dict[(character as usize) - DebugDictionary::ASCII_a_VALUE] {
             Entry::Empty => {
-              dict[(character as usize) - DebugDictionary::ASCII_A_VALUE] = Entry::Present(Letter {
+              dict[(character as usize) - DebugDictionary::ASCII_a_VALUE] = Entry::Present(Letter {
                 c: character as char,
                 is_word: cur_is_word,
                 possible_next_letters: Box::new(vec![Entry::Empty; 26]),
@@ -149,17 +148,17 @@ impl DebugDictionary {
             }
           }
           // Pointer to where in the data structure we currently are.
-          current_letter = &mut dict[(character as usize) - DebugDictionary::ASCII_A_VALUE];
+          current_letter = &mut dict[(character as usize) - DebugDictionary::ASCII_a_VALUE];
         } else {
           match current_letter {
             Entry::Empty => println!("Failure! Incorrectly set to Empty"),
             Entry::Present(cl) => {
               match &mut cl.possible_next_letters
-                [(character as usize) - DebugDictionary::ASCII_A_VALUE]
+                [(character as usize) - DebugDictionary::ASCII_a_VALUE]
               {
                 // If the letter isn't present, fill it in with a new Letter entry.
                 Entry::Empty => {
-                  cl.possible_next_letters[(character as usize) - DebugDictionary::ASCII_A_VALUE] =
+                  cl.possible_next_letters[(character as usize) - DebugDictionary::ASCII_a_VALUE] =
                     Entry::Present(Letter {
                       c: character as char,
                       is_word: cur_is_word,
@@ -172,7 +171,7 @@ impl DebugDictionary {
                 }
               }
               current_letter = &mut cl.possible_next_letters
-                [(character as usize) - DebugDictionary::ASCII_A_VALUE];
+                [(character as usize) - DebugDictionary::ASCII_a_VALUE];
             }
           }
         }

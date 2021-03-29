@@ -44,3 +44,16 @@ impl Add for Solution {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  fn test_add() {
+    let s1 = Solution::new(vec![String::from("one"), String::from("two")], 8);
+    let s2 = Solution::new(vec![String::from("three"), String::from("four")], 10);
+    let s3 = s1 + s2;
+    assert!(s3.score == 18);
+    assert!(s3.words_found == 
+      vec![String::from("one"), String::from("two"), String::from("three"), String::from("four")]);
+  }
+}

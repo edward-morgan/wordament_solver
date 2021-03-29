@@ -21,9 +21,13 @@ impl Grid {
 
   /** Update the value in a cell.
    */
-  pub fn set_cell(&mut self, letter: char, value: i32, row: usize, col: usize) {
+  pub fn set(&mut self, letter: char, value: i32, row: usize, col: usize) {
     self.cells[row][col].letter = letter;
     self.cells[row][col].value = value;
+  }
+
+  pub fn get(&self, row: usize, col: usize) -> Cell {
+    self.cells[row][col]
   }
 
   /** Returns a slice of string slices that each represent a neighbor of the current letter.
@@ -73,10 +77,9 @@ pub struct Cell {
   value: i32,
 }
 impl Default for Cell {
-  // TODO: make sure this default value is okay
   fn default() -> Cell {
     Cell {
-      letter: 'a',
+      letter: ' ',
       value: 0,
     }
   }
@@ -85,5 +88,49 @@ impl Default for Cell {
 impl fmt::Debug for Cell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "({}: {})", self.letter, self.value)
+    }
+}
+
+
+// TESTS
+#[cfg(test)]
+mod tests {
+  use super::*;
+    #[test]
+    fn test_init() {
+        let g1 = Grid::init(5, 4);
+        assert_eq!(g1.width, 5);
+        assert_eq!(g1.height, 4);
+        let g2 = Grid::init(0, 0);
+        assert_eq!(g2.width, 0);
+        assert_eq!(g2.height, 0);
+    }
+
+    #[test]
+    fn test_set_cell() {
+        let mut g1 = Grid::init(5, 4);
+        assert_eq!(g1.width, 5);
+        assert_eq!(g1.height, 4);
+        g1.set('a', 10, 0, 0);
+        g1.set('b', 11, 0, 1);
+        g1.set('c', 12, 0, 2);
+        g1.set('d', 13, 0, 3);
+        assert!(g1.get(0, 0).letter == 'a');
+        assert!(g1.get(0, 0).value == 10);
+        assert!(g1.get(0, 2).letter == 'c');
+        assert!(g1.get(0, 2).value == 12);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bad_cell() {
+        let mut g1 = Grid::init(5, 4);
+        assert_eq!(g1.width, 5);
+        assert_eq!(g1.height, 4);
+        g1.set('a', 10, 0, 0);
+        g1.set('b', 11, 0, 1);
+        g1.set('c', 12, 0, 2);
+        g1.set('d', 13, 0, 3);
+        g1.get(3,10);
     }
 }
