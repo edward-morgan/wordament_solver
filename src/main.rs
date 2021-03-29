@@ -1,20 +1,21 @@
-mod grid;
-mod dictionary;
-mod lib;
+// mod dictionary;
+// mod grid;
+// mod lib;
 
-use grid::*;
-use lib::Solution;
+use wordament_solver::grid;
+use wordament_solver::dictionary::{Dictionary, DebugDictionary};
+use wordament_solver::Solution;
 
 /** Assumptions:
  * - Words must be made by connecting letters adjacent to each other, along a path.
  * - Letters cannot be reused.
- * 
+ *
  *        start
  * | (a) | (b) | --> b, a, d
  * |  c  | (d) |
  */
 fn main() {
-  let mut grid = Grid::init(2, 2);
+  let mut grid = grid::Grid::init(2, 2);
   grid.set_cell('a', 1, 0, 0);
   grid.set_cell('b', 1, 0, 1);
   grid.set_cell('c', 1, 1, 0);
@@ -23,12 +24,20 @@ fn main() {
   println!("Grid:\n{:?}", grid);
 
   // Set up the dictionary
-  let dbd = dictionary::DebugDictionary::new();
+  let dbd = &DebugDictionary::new();
 
-  println!("Dictionary: \n{}", dbd.to_string());
+  // println!("Dictionary: \n{}", dbd.to_string());
+
+  // TODO: These should all be moved to /tests
+    let source_dictionary: Vec<&str> = vec!["ad", "bad", "cab", "cad", "ab", "a"];
+    for word in source_dictionary {
+      println!("{}: {}", word, DebugDictionary::find_word(dbd, word));
+    }
+    println!("{}", DebugDictionary::to_string(dbd));
+
+    let s1 = Solution::new(vec![String::from("one"), String::from("two")], 8);
+    let s2 = Solution::new(vec![String::from("three"), String::from("four")], 10);
+    println!("{}", s1 + s2);
+
   // println!("{}", find_all_words(&grid, &dictionary::DebugDictionary::new()));
-}
-
-fn find_all_words(grid: &Grid, dict: &dictionary::DebugDictionary) -> Solution {
-  Solution::new(vec![String::from("")], 0)
 }

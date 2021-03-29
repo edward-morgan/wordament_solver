@@ -1,6 +1,3 @@
-use crate::grid::*;
-use crate::Solution;
-
 // TODO: define a trait for multiple dictionary types: debug, API access, local file, etc.
 
 /** Thoughts on how to build the dictionary data structure
@@ -14,8 +11,8 @@ use crate::Solution;
  * ...
  */
 
- /** An entry in the dictionary data structure can either be empty or a letter.
-  */
+/** An entry in the dictionary data structure can either be empty or a letter.
+ */
 #[derive(Clone, Debug)]
 enum Entry {
   Empty,
@@ -37,8 +34,8 @@ struct Letter {
 /**
  * Every dictionary should have an implementation of a word finding function on it
  */
-trait Dictionary {
-  fn find_word(letters: &str) -> bool;
+pub trait Dictionary {
+  fn find_word(dict: &Self, letters: &str) -> bool;
 }
 
 // Simple dictionary for debugging use
@@ -46,6 +43,32 @@ trait Dictionary {
 pub struct DebugDictionary {
   words: Box<Vec<Entry>>,
 }
+impl Dictionary for DebugDictionary {
+  /** This is a slower way of traversing the dictionary. Instead of proceeding step-by-step as you progress through the
+   * grid, this passes a candidate word to the Dictionary, which returns a boolean if it finds it.
+   */
+  fn find_word(dict: &Self, letters: &str) -> bool {
+    let mut current_letter: &Letter = &Letter::default();
+    for (i, letter) in letters.chars().enumerate() {
+      let index = letter as usize - DebugDictionary::ASCII_A_VALUE;
+      // TODO: Could get rid of this "is i == 0" nonsense by making the dictionary start with an (always Present) Entry.
+      if i == 0 {
+        match &dict.words[index] {
+          Entry::Empty => return false,
+          Entry::Present(letter) => current_letter = &letter
+        }
+      } else {
+        match &current_letter.possible_next_letters[index] {
+          Entry::Empty => return false,
+          Entry::Present(letter) => current_letter = &letter
+
+        }
+      }
+    }
+    return current_letter.is_word;
+  }
+}
+
 impl DebugDictionary {
   const ASCII_A_VALUE: usize = 97;
   // const ASCII_Z_VALUE: usize = 122;
@@ -61,7 +84,7 @@ impl DebugDictionary {
 
   /** Print the dictionary out in the linked format.
    */
-  pub fn to_string(self) -> String {
+  pub fn to_string(dict: &Self) -> String {
     fn to_string_recursive(words: &Vec<Entry>, spaces: usize) -> String {
       let mut string = String::new();
       for (i, entry) in words.into_iter().enumerate() {
@@ -89,15 +112,14 @@ impl DebugDictionary {
             let spaces_str = "- ".repeat(spaces);
             string.push_str(format!("{}{}\n", spaces_str, str_addition).as_str());
             // println!("{}{}: {}", spaces_str, letter.c, is_word_string);
-            string.push_str(
-              to_string_recursive(&letter.possible_next_letters, spaces + 1).as_str()
-            );
+            string
+              .push_str(to_string_recursive(&letter.possible_next_letters, spaces + 1).as_str());
           }
         }
       }
       string
     }
-    to_string_recursive(&self.words, 0)
+    to_string_recursive(&dict.words, 0)
   }
 
   /** Takes a list of words and encodes them in the linked dictionary format. This format allows the solver to
