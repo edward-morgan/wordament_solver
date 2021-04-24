@@ -5,8 +5,8 @@ use std::option::Option;
  */
 pub struct Grid {
   cells: Vec<Vec<Cell>>,
-  width: usize,
-  height: usize,
+  pub width: usize,
+  pub height: usize,
 }
 impl Grid {
   /** Initialize a Grid with a width/height. All cells will be set to a default value.
@@ -21,7 +21,7 @@ impl Grid {
 
   /** Update the value in a cell.
    */
-  pub fn set(&mut self, letter: char, value: i32, row: usize, col: usize) {
+  pub fn set(&mut self, letter: char, value: u32, row: usize, col: usize) {
     self.cells[row][col].letter = letter;
     self.cells[row][col].value = value;
   }
@@ -35,11 +35,11 @@ impl Grid {
    * [3]   (r,c)  [4]
    * [5]   [6]    [7]
    */
-  pub fn find_neighbors(self, prefix: &str, row: usize, col: usize) -> [Option<Cell>; 8] {
-    let left_bound = col - 1 > 0;
-    let upper_bound = row - 1 > 0;
-    let right_bound = row + 1 < self.width;
-    let bottom_bound = col + 1 < self.height;
+  pub fn find_neighbors(&self, row: usize, col: usize) -> [Option<Cell>; 8] {
+    let left_bound = col > 0;
+    let upper_bound = row > 0;
+    let right_bound = col < self.width - 1;
+    let bottom_bound = row < self.height - 1;
 
     let possible_neighbors: [Option<Cell>; 8] = [
       if upper_bound && left_bound {Some(self.cells[row - 1][col - 1])} else {None},
@@ -73,14 +73,14 @@ impl fmt::Debug for Grid {
 
 #[derive(Clone, Copy)]
 pub struct Cell {
-  letter: char,
-  value: i32,
+  pub letter: char,
+  pub value: u32,
 }
 impl Default for Cell {
   fn default() -> Cell {
     Cell {
       letter: ' ',
-      value: 0,
+      value: 0
     }
   }
 }
@@ -132,5 +132,31 @@ mod tests {
         g1.set('c', 12, 0, 2);
         g1.set('d', 13, 0, 3);
         g1.get(3,10);
+    }
+
+    #[test]
+    fn test_get_neighbors() {
+      let mut g = Grid::init(3, 3);
+      g.set('a', 0, 0, 0);
+      g.set('b', 1, 0, 1);
+      g.set('c', 2, 0, 2);
+
+      g.set('d', 3, 1, 0);
+      g.set('e', 4, 1, 1);
+      g.set('f', 5, 1, 2);
+
+      g.set('g', 6, 2, 0);
+      g.set('h', 7, 2, 1);
+      g.set('i', 8, 2, 2);
+
+      let middle_neighbors: [Option<Cell>; 8] = g.find_neighbors(1, 1);
+      assert!(middle_neighbors[0].unwrap().letter == 'a');
+      assert!(middle_neighbors[1].unwrap().letter == 'b');
+      assert!(middle_neighbors[2].unwrap().letter == 'c');
+      assert!(middle_neighbors[3].unwrap().letter == 'd');
+      assert!(middle_neighbors[4].unwrap().letter == 'f');
+      assert!(middle_neighbors[5].unwrap().letter == 'g');
+      assert!(middle_neighbors[6].unwrap().letter == 'h');
+      assert!(middle_neighbors[7].unwrap().letter == 'i');
     }
 }

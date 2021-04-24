@@ -3,8 +3,14 @@
 // mod lib;
 
 use wordament_solver::grid;
-use wordament_solver::dictionary::{Dictionary, DebugDictionary};
-use wordament_solver::Solution;
+use wordament_solver::dictionary::DebugDictionary;
+use wordament_solver::Solver;
+
+use std::{
+  fs::File,
+  io::{prelude::*, BufReader},
+  path::Path,
+};
 
 /** Assumptions:
  * - Words must be made by connecting letters adjacent to each other, along a path.
@@ -24,16 +30,14 @@ fn main() {
   println!("Grid:\n{:?}", grid);
 
   // Set up the dictionary
-  let dbd = &DebugDictionary::new();
+  let dbd = DebugDictionary::new();
 
   // println!("Dictionary: \n{}", dbd.to_string());
 
   // TODO: These should all be moved to /tests
     let source_dictionary: Vec<&str> = vec!["ad", "bad", "cab", "cad", "ab", "a"];
-    for word in source_dictionary {
-      println!("{}: {}", word, DebugDictionary::find_word(dbd, word));
-    }
-    println!("{}", DebugDictionary::to_string(dbd));
+    println!("{}", DebugDictionary::to_string(&dbd));
 
-  // println!("{}", find_all_words(&grid, &dictionary::DebugDictionary::new()));
+    let solver = Solver::<DebugDictionary>{ grid: grid, dictionary: dbd };
+    println!("{}", solver.solve_grid())
 }

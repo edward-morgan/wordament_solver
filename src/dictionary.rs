@@ -34,7 +34,10 @@ struct Letter {
  * Every dictionary should have an implementation of a word finding function on it
  */
 pub trait Dictionary {
-  fn find_word(dict: &Self, letters: &str) -> bool;
+  /**
+   * Should return a 2-tuple of the form (is a word, is a terminal word)
+   */
+  fn is_word(dict: &Self, letters: &str) -> (bool, bool);
 }
 
 // Simple dictionary for debugging use
@@ -43,28 +46,25 @@ pub struct DebugDictionary {
   words: Box<Vec<Entry>>,
 }
 impl Dictionary for DebugDictionary {
-  /** This is a slower way of traversing the dictionary. Instead of proceeding step-by-step as you progress through the
-   * grid, this passes a candidate word to the Dictionary, which returns a boolean if it finds it.
+  /**
+   Given a candidate word, return two things:
+   * Whether the candidate is a word or not
+   * Whether the sequence of letters is terminal in the dictionary (and thus a search need not continue down this path)
    */
-  fn find_word(dict: &Self, letters: &str) -> bool {
-    let mut current_letter: &Letter = &Letter::default();
-    for (i, letter) in letters.chars().enumerate() {
-      let index = letter as usize - DebugDictionary::ASCII_a_VALUE;
-      // TODO: Could get rid of this "is i == 0" nonsense by making the dictionary start with an (always Present) Entry.
-      if i == 0 {
-        match &dict.words[index] {
-          Entry::Empty => return false,
-          Entry::Present(letter) => current_letter = &letter
+  fn is_word(dict: &Self, letters: &str) -> (bool, bool) {
+    match dict.find_word(letters) {
+      None => (false, true),
+      Some(l) => {
+        // If any possible next letter is present, it isn't terminal
+        for possible_l in l.possible_next_letters.into_iter() {
+          match possible_l {
+            Entry::Empty => {},
+            Entry::Present(_) => return (true, false),
+          }
         }
-      } else {
-        match &current_letter.possible_next_letters[index] {
-          Entry::Empty => return false,
-          Entry::Present(letter) => current_letter = &letter
-
-        }
+        return (true, true)
       }
     }
-    return current_letter.is_word;
   }
 }
 
@@ -81,13 +81,39 @@ impl DebugDictionary {
     }
   }
 
+  /** This is a slower way of traversing the dictionary. Instead of proceeding step-by-step as you progress through the
+   grid, this passes a candidate word to the Dictionary, which returns a boolean if it finds it.
+   */
+  fn find_word(&self, letters: &str) -> Option<Letter> {
+    let mut current_letter: &Letter = &Letter::default();
+    if letters == "" {
+      return None
+    }
+
+    for (i, letter) in letters.chars().enumerate() {
+      let index = letter as usize - DebugDictionary::ASCII_a_VALUE;
+      // TODO: Could get rid of this "is i == 0" nonsense by making the dictionary start with an (always Present) Entry.
+      if i == 0 {
+        match &self.words[index] {
+          Entry::Empty => return None,
+          Entry::Present(letter) => current_letter = &letter
+        }
+      } else {
+        match &current_letter.possible_next_letters[index] {
+          Entry::Empty => return None,
+          Entry::Present(letter) => current_letter = &letter
+        }
+      }
+    }
+    return Some(current_letter.clone()); // TODO: does this clone the entire dictionary?
+  }
+
   /** Print the dictionary out in the linked format.
    */
   pub fn to_string(dict: &Self) -> String {
     fn to_string_recursive(words: &Vec<Entry>, spaces: usize) -> String {
       let mut string = String::new();
       for (i, entry) in words.into_iter().enumerate() {
-        // println!("{}WORD: {:?}", "-".repeat(spaces), entry);
         match entry {
           Entry::Empty => {
             // let str_addition = format!(
@@ -110,7 +136,6 @@ impl DebugDictionary {
             );
             let spaces_str = "- ".repeat(spaces);
             string.push_str(format!("{}{}\n", spaces_str, str_addition).as_str());
-            // println!("{}{}: {}", spaces_str, letter.c, is_word_string);
             string
               .push_str(to_string_recursive(&letter.possible_next_letters, spaces + 1).as_str());
           }
