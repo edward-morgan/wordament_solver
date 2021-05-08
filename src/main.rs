@@ -3,7 +3,7 @@
 // mod lib;
 
 use wordament_solver::grid;
-use wordament_solver::dictionary::DebugDictionary;
+use wordament_solver::dictionary::VecDictionary;
 use wordament_solver::Solver;
 
 use std::{
@@ -30,14 +30,24 @@ fn main() {
   println!("Grid:\n{:?}", grid);
 
   // Set up the dictionary
-  let dbd = DebugDictionary::new();
+
+  let path = Path::new("words_alpha.txt");
+  let mut file = match File::open(&path) {
+      Err(why) => panic!("couldn't open {}: {}", path.display(), why),
+      Ok(file) => file,
+  };
+  let reader = BufReader::new(&file);
+
+  let mut words: Vec<String> = reader.lines().filter(|x| x.is_ok()).map(|x| x.unwrap()).collect();
+  let dbd = VecDictionary::new(&words);
+  println!("Created dictionary");
 
   // println!("Dictionary: \n{}", dbd.to_string());
 
   // TODO: These should all be moved to /tests
     let source_dictionary: Vec<&str> = vec!["ad", "bad", "cab", "cad", "ab", "a"];
-    println!("{}", DebugDictionary::to_string(&dbd));
+    // println!("{}", VecDictionary::to_string(&dbd));
 
-    let solver = Solver::<DebugDictionary>{ grid: grid, dictionary: dbd };
-    println!("{}", solver.solve_grid())
+    let solver = Solver::<VecDictionary>{ grid: grid, dictionary: dbd };
+    println!("Solution: {}", solver.solve_grid())
 }

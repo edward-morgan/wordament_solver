@@ -1,4 +1,3 @@
-
 /* Thoughts on how to build the dictionary data structure
  * 'a' -> | 'aa' -> ... ... ... 'aardvark' ...
  *        | 'ab' -> ...
@@ -42,15 +41,15 @@ pub trait Dictionary {
 
 // Simple dictionary for debugging use
 #[derive(Debug)]
-pub struct DebugDictionary {
+pub struct VecDictionary {
   words: Box<Vec<Entry>>,
 }
-impl Dictionary for DebugDictionary {
+impl Dictionary for VecDictionary {
   /**
-   Given a candidate word, return two things:
-   * Whether the candidate is a word or not
-   * Whether the sequence of letters is terminal in the dictionary (and thus a search need not continue down this path)
-   */
+  Given a candidate word, return two things:
+  * Whether the candidate is a word or not
+  * Whether the sequence of letters is terminal in the dictionary (and thus a search need not continue down this path)
+  */
   fn is_word(dict: &Self, letters: &str) -> (bool, bool) {
     match dict.find_word(letters) {
       None => (false, true),
@@ -58,50 +57,49 @@ impl Dictionary for DebugDictionary {
         // If any possible next letter is present, it isn't terminal
         for possible_l in l.possible_next_letters.into_iter() {
           match possible_l {
-            Entry::Empty => {},
+            Entry::Empty => {}
             Entry::Present(_) => return (true, false),
           }
         }
-        return (true, true)
+        return (true, true);
       }
     }
   }
 }
 
-impl DebugDictionary {
+impl VecDictionary {
   const ASCII_a_VALUE: usize = 'a' as usize;
   // const ASCII_Z_VALUE: usize = 122;
 
-  pub fn new() -> DebugDictionary {
+  pub fn new(source_dictionary: &Vec<String>) -> VecDictionary {
     // TODO: what if capitalized?
     // TODO: should remove duplicates
-    let source_dictionary: Vec<&str> = vec!["ad", "bad", "cab", "cad", "ab", "a"];
-    DebugDictionary {
-      words: DebugDictionary::translate_dictionary_to_word_map(source_dictionary),
+    VecDictionary {
+      words: VecDictionary::translate_dictionary_to_word_map(source_dictionary),
     }
   }
 
   /** This is a slower way of traversing the dictionary. Instead of proceeding step-by-step as you progress through the
-   grid, this passes a candidate word to the Dictionary, which returns a boolean if it finds it.
-   */
+  grid, this passes a candidate word to the Dictionary, which returns a boolean if it finds it.
+  */
   fn find_word(&self, letters: &str) -> Option<Letter> {
     let mut current_letter: &Letter = &Letter::default();
     if letters == "" {
-      return None
+      return None;
     }
 
     for (i, letter) in letters.chars().enumerate() {
-      let index = letter as usize - DebugDictionary::ASCII_a_VALUE;
+      let index = letter as usize - VecDictionary::ASCII_a_VALUE;
       // TODO: Could get rid of this "is i == 0" nonsense by making the dictionary start with an (always Present) Entry.
       if i == 0 {
         match &self.words[index] {
           Entry::Empty => return None,
-          Entry::Present(letter) => current_letter = &letter
+          Entry::Present(letter) => current_letter = &letter,
         }
       } else {
         match &current_letter.possible_next_letters[index] {
           Entry::Empty => return None,
-          Entry::Present(letter) => current_letter = &letter
+          Entry::Present(letter) => current_letter = &letter,
         }
       }
     }
@@ -118,7 +116,7 @@ impl DebugDictionary {
           Entry::Empty => {
             // let str_addition = format!(
             //   "{}: <Empty>\n",
-            //   (i as u8 + DebugDictionary::ASCII_a_VALUE as u8) as char
+            //   (i as u8 + VecDictionaryASCII_a_VALUE as u8) as char
             // );
             // let spaces_str = " ".repeat(spaces);
             // string.push_str(format!("{}{}", str_addition, spaces_str).as_str());
@@ -131,7 +129,7 @@ impl DebugDictionary {
             };
             let str_addition = format!(
               "{}: {} -> ",
-              (i as u8 + DebugDictionary::ASCII_a_VALUE as u8) as char,
+              (i as u8 + VecDictionary::ASCII_a_VALUE as u8) as char,
               is_word_string
             );
             let spaces_str = "- ".repeat(spaces);
@@ -150,18 +148,19 @@ impl DebugDictionary {
    * iteratively search through the dictionary at each step of grid traversal, instead of having to iterate through
    * the entire dictionary at each step (sort of similar to depth-first search, I suppose).
    */
-  fn translate_dictionary_to_word_map(source_dictionary: Vec<&str>) -> Box<Vec<Entry>> {
+  fn translate_dictionary_to_word_map(source_dictionary: &Vec<String>) -> Box<Vec<Entry>> {
     let mut dict: Box<Vec<Entry>> = Box::new(vec![Entry::Empty; 26]);
     let mut current_letter: &mut Entry = &mut Entry::Empty;
 
     for word in source_dictionary {
-      for (i, character) in String::from(word).into_bytes().into_iter().enumerate() {
+      let w = word.clone();
+      for (i, character) in w.into_bytes().into_iter().enumerate() {
         let cur_is_word: bool = if i == word.len() - 1 { true } else { false };
         // If the first letter in the word
         if i == 0 {
-          match &mut dict[(character as usize) - DebugDictionary::ASCII_a_VALUE] {
+          match &mut dict[(character as usize) - VecDictionary::ASCII_a_VALUE] {
             Entry::Empty => {
-              dict[(character as usize) - DebugDictionary::ASCII_a_VALUE] = Entry::Present(Letter {
+              dict[(character as usize) - VecDictionary::ASCII_a_VALUE] = Entry::Present(Letter {
                 c: character as char,
                 is_word: cur_is_word,
                 possible_next_letters: Box::new(vec![Entry::Empty; 26]),
@@ -173,17 +172,17 @@ impl DebugDictionary {
             }
           }
           // Pointer to where in the data structure we currently are.
-          current_letter = &mut dict[(character as usize) - DebugDictionary::ASCII_a_VALUE];
+          current_letter = &mut dict[(character as usize) - VecDictionary::ASCII_a_VALUE];
         } else {
           match current_letter {
             Entry::Empty => println!("Failure! Incorrectly set to Empty"),
             Entry::Present(cl) => {
               match &mut cl.possible_next_letters
-                [(character as usize) - DebugDictionary::ASCII_a_VALUE]
+                [(character as usize) - VecDictionary::ASCII_a_VALUE]
               {
                 // If the letter isn't present, fill it in with a new Letter entry.
                 Entry::Empty => {
-                  cl.possible_next_letters[(character as usize) - DebugDictionary::ASCII_a_VALUE] =
+                  cl.possible_next_letters[(character as usize) - VecDictionary::ASCII_a_VALUE] =
                     Entry::Present(Letter {
                       c: character as char,
                       is_word: cur_is_word,
@@ -195,8 +194,8 @@ impl DebugDictionary {
                   letter.is_word |= cur_is_word;
                 }
               }
-              current_letter = &mut cl.possible_next_letters
-                [(character as usize) - DebugDictionary::ASCII_a_VALUE];
+              current_letter =
+                &mut cl.possible_next_letters[(character as usize) - VecDictionary::ASCII_a_VALUE];
             }
           }
         }
