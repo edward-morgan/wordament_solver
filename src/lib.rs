@@ -23,12 +23,8 @@ impl<T: dictionary::Dictionary> Solver<T> {
     final_solution
   }
 
-    /*
-   * [0]   [1]    [2]  
-   * [3]   (r,c)  [4]
-   * [5]   [6]    [7]
+  /* Starting at (row, col), find all words emanating from that letter. 
    */
-
   fn find_words_from(&self, row: usize, col: usize, word_acc: &str, score: u32) -> Solution {
     let mut soln = Solution::default();
     // First, check if the current candidate is a word
@@ -36,12 +32,9 @@ impl<T: dictionary::Dictionary> Solver<T> {
     if is_word {
       soln.found(String::from(word_acc), score);  
     }
-
     // If this word has no subsequent words, stop recursing
     if !is_terminal {
       let possible_neighbors: &[Option<grid::Cell>; 8] = &self.grid.find_neighbors(row, col);
-      // println!("neighbors: {:?}", possible_neighbors);
-
       let row_mvmts: [i32; 8] = [-1, -1, -1, 0, 0, 1, 1, 1];
       let col_mvmts: [i32; 8] = [-1, 0, 1, -1, 1, -1, 0, 1];
       for i in 0..8 {
@@ -49,7 +42,6 @@ impl<T: dictionary::Dictionary> Solver<T> {
           Some(l) => {
             let w = format!("{}{}", word_acc, l.letter);
             let s = self.find_words_from((row as i32 + row_mvmts[i]) as usize, (col as i32 + col_mvmts[i]) as usize, w.as_str(), score + l.value);
-            // println!("Score of word(s) [{:?}]: {}", s.words_found, s.score);
             soln.add_soln(&s);
           },
           None => {},

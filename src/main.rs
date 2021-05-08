@@ -1,10 +1,6 @@
-// mod dictionary;
-// mod grid;
-// mod lib;
-
 use wordament_solver::grid;
-use wordament_solver::dictionary::VecDictionary;
 use wordament_solver::Solver;
+use wordament_solver::dictionary::GraphDictionary;
 
 use std::{
   fs::File,
@@ -14,7 +10,7 @@ use std::{
 
 /** Assumptions:
  * - Words must be made by connecting letters adjacent to each other, along a path.
- * - Letters cannot be reused.
+ * - Letters cannot be reused. TODO: This is not implemented yet
  *
  *        start
  * | (a) | (b) | --> b, a, d
@@ -32,22 +28,16 @@ fn main() {
   // Set up the dictionary
 
   let path = Path::new("words_alpha.txt");
-  let mut file = match File::open(&path) {
+  let file = match File::open(&path) {
       Err(why) => panic!("couldn't open {}: {}", path.display(), why),
       Ok(file) => file,
   };
   let reader = BufReader::new(&file);
 
-  let mut words: Vec<String> = reader.lines().filter(|x| x.is_ok()).map(|x| x.unwrap()).collect();
-  let dbd = VecDictionary::new(&words);
-  println!("Created dictionary");
+  let words: Vec<String> = reader.lines().filter(|x| x.is_ok()).map(|x| x.unwrap()).collect();
+  let dbd = GraphDictionary::new(&words);
+  println!("Instantiated dictionary");
 
-  // println!("Dictionary: \n{}", dbd.to_string());
-
-  // TODO: These should all be moved to /tests
-    let source_dictionary: Vec<&str> = vec!["ad", "bad", "cab", "cad", "ab", "a"];
-    // println!("{}", VecDictionary::to_string(&dbd));
-
-    let solver = Solver::<VecDictionary>{ grid: grid, dictionary: dbd };
-    println!("Solution: {}", solver.solve_grid())
+  let solver = Solver::<GraphDictionary>{ grid: grid, dictionary: dbd };
+  println!("Solution: {}", solver.solve_grid())
 }
