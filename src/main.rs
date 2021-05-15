@@ -10,7 +10,7 @@ use std::{
 
 /** Assumptions:
  * - Words must be made by connecting letters adjacent to each other, along a path.
- * - Letters cannot be reused. TODO: This is not implemented yet
+ * - Letters cannot be reused.
  *
  *        start
  * | (a) | (b) | --> b, a, d
@@ -38,6 +38,6 @@ fn main() {
   let dbd = GraphDictionary::new(&words);
   println!("Instantiated dictionary");
 
-  let solver = Solver::<GraphDictionary>{ grid: grid, dictionary: dbd };
+  let solver = Solver::<GraphDictionary>::new(dbd, grid);
   println!("Solution: {}", solver.solve_grid())
 }

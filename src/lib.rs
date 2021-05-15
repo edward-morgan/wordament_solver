@@ -5,32 +5,51 @@ pub mod dictionary;
 pub mod grid;
 
 pub struct Solver<T: dictionary::Dictionary> {
-  pub dictionary: T,
-  pub grid: grid::Grid,
+  dictionary: T,
+  grid: grid::Grid,
 }
 
 impl<T: dictionary::Dictionary> Solver<T> {
+
+  pub fn new(dictionary: T, grid: grid::Grid) -> Self {
+    Solver::<T> { dictionary, grid}
+  }
   pub fn solve_grid(self) -> Solution {
     let mut final_solution: Solution = Solution::default();
     // TODO: this could probably be parallelized
     for row in 0..self.grid.height {
       for col in 0..self.grid.width {
-        let start = &self.grid.get(row,col);
-        let s: Solution = self.find_words_from(row, col, format!("{}", start.letter).as_str(), start.value);
+        let start = &self.grid.get(row, col);
+        let s: Solution = self.find_words_from(
+          row,
+          col,
+          format!("{}", start.letter).as_str(),
+          start.value,
+          &mut vec![vec![false; self.grid.width]; self.grid.height]
+        );
         final_solution += s;
       }
     }
     final_solution
   }
 
-  /* Starting at (row, col), find all words emanating from that letter. 
+  /* Starting at (row, col), find all words emanating from that letter.
    */
-  fn find_words_from(&self, row: usize, col: usize, word_acc: &str, score: u32) -> Solution {
+  fn find_words_from(
+    &self,
+    row: usize,
+    col: usize,
+    word_acc: &str,
+    score: u32,
+    visited_cells: &mut Vec<Vec<bool>>,
+  ) -> Solution {
     let mut soln = Solution::default();
+    // This cell has now been visited
+    visited_cells[row][col] = true;
     // First, check if the current candidate is a word
     let (is_word, is_terminal) = dictionary::Dictionary::is_word(&self.dictionary, word_acc);
     if is_word {
-      soln.found(String::from(word_acc), score);  
+      soln.found(String::from(word_acc), score);
     }
     // If this word has no subsequent words, stop recursing
     if !is_terminal {
@@ -40,11 +59,22 @@ impl<T: dictionary::Dictionary> Solver<T> {
       for i in 0..8 {
         match &possible_neighbors[i] {
           Some(l) => {
-            let w = format!("{}{}", word_acc, l.letter);
-            let s = self.find_words_from((row as i32 + row_mvmts[i]) as usize, (col as i32 + col_mvmts[i]) as usize, w.as_str(), score + l.value);
-            soln.add_soln(&s);
-          },
-          None => {},
+            // Make sure the neighbor hasn't been visited before
+            let neighbor_row = (row as i32 + row_mvmts[i]) as usize;
+            let neighbor_col = (col as i32 + col_mvmts[i]) as usize;
+            if !visited_cells[neighbor_row][neighbor_col] {
+              let w = format!("{}{}", word_acc, l.letter);
+              let s = self.find_words_from(
+                neighbor_row,
+                neighbor_col,
+                w.as_str(),
+                score + l.value,
+                visited_cells,
+              );
+              soln.add_soln(&s);
+            }
+          }
+          None => {}
         }
       }
     }
@@ -78,14 +108,17 @@ impl Solution {
   pub fn add_soln(&mut self, other: &Self) {
     let all_words =
       Vec::<String>::from([self.words_found.as_slice(), other.words_found.as_slice()].concat());
-      self.words_found = all_words;
-      self.score += other.score;
+    self.words_found = all_words;
+    self.score += other.score;
   }
 }
 
 impl Default for Solution {
   fn default() -> Solution {
-    Solution { words_found: Vec::default(), score: 0}
+    Solution {
+      words_found: Vec::default(),
+      score: 0,
+    }
   }
 }
 impl fmt::Display for Solution {
